@@ -1,35 +1,53 @@
+// hooks/useAuth.js
 import { useState, useEffect } from 'react';
-import auth from '@react-native-firebase/auth';
+import { getApp } from '@react-native-firebase/app';
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as signOutRNF,
+} from '@react-native-firebase/auth';
 
 export default function useAuth() {
   const [user, setUser] = useState(null);
+  const [isLogin, setIsLogin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // create native auth instance from native app
+  const nativeApp = getApp();
+  const auth = getAuth(nativeApp);
 
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, currentUser => {
+      setUser(currentUser ?? null);
+      setIsLogin(!!currentUser);
+      setLoading(false);
+    });
+    return () => unsub();
+  }, [auth]);
 
-const signUp = async (email, password) => {
-  try {
-    // Create user with email and password
-    const userCredential = await auth().createUserWithEmailAndPassword(email, password);
-    console.log('User account created & signed in!', userCredential.user);
-    return userCredential.user;
-  } catch (error) {
-    if (error.code === 'auth/email-already-in-use') {
-      console.log('That email address is already in use!');
+  const signUp = async (email, password, username) => {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      return cred.user;
+    } catch (e) {
+      throw e;
     }
-    if (error.code === 'auth/invalid-email') {
-      console.log('That email address is invalid!');
+  };
+
+  const signIn = async (email, password) => {
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      return cred.user;
+    } catch (e) {
+      throw e;
     }
-    if (error.code === 'auth/weak-password') {
-      console.log('Password should be at least 6 characters!');
-    }
-    console.error(error);
-  }
-};
+  };
 
+  const logout = async () => {
+    await signOutRNF(auth);
+  };
 
-
-
-
-
-  return { user ,signUp};
+  return { user, isLogin, loading, signUp, signIn, logout };
 }

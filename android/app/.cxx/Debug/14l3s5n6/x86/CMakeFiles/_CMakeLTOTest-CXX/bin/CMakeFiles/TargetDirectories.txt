@@ -1,0 +1,4 @@
+C:/dev/p3/android/app/.cxx/Debug/14l3s5n6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+C:/dev/p3/android/app/.cxx/Debug/14l3s5n6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+C:/dev/p3/android/app/.cxx/Debug/14l3s5n6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+C:/dev/p3/android/app/.cxx/Debug/14l3s5n6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

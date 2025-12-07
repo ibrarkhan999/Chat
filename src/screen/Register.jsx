@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { showMessage } from 'react-native-flash-message';
 
 const SignUpScreen = () => {
   const [name, setName] = useState('');
@@ -10,11 +19,15 @@ const SignUpScreen = () => {
   const navigation = useNavigation();
 
   const handleSignUp = () => {
-    if (name && email && password && imageUrl) {
-      Alert.alert('Success', `Account created for ${name}`);
-      // You can add Firebase or API signup logic here
-    } else {
-      Alert.alert('Error', 'Please fill all fields');
+    if (!name || !email || !password) {
+      showMessage({
+        message: 'Login Failed 😢',
+        description: 'Please check your credentials',
+        type: 'danger',
+        icon: 'danger',
+        duration: 3000,
+      });
+      return;
     }
   };
 
