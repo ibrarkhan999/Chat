@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react-native",
+    "moduleResolution": "node",
+    "target": "esnext",
+    "module": "esnext",
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": ["**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules", "Pods"]
+}
