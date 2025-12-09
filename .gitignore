@@ -11,11 +11,16 @@ ios/build/
 .env.*  
 *.env
 
-# Firebase config (DON'T upload these)
+# Firebase config
 firebase.js
 firebaseConfig.js
-google-services.json
-GoogleService-Info.plist
+android/app/google-services.json
+ios/GoogleService-Info.plist
+
+# React Native caches
+.expo/
+.expo-shared/
+*.expo
 
 # IDE settings
 .vscode/
@@ -30,3 +35,6 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Misc
+*.iml
