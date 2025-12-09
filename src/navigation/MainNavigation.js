@@ -4,14 +4,14 @@ import useAuth from '../hooks/useAuth';
 import Home from '../screen/Home';
 import Login from '../screen/Login';
 import Register from '../screen/Register';
-import SplashScreen from '../screen/Splash';
+import LDNG from '../components/LDNG';
 
 const Stack = createNativeStackNavigator();
 
 export default function MainNavigation() {
   const { isLogin, loading } = useAuth();
 
-  if (loading) return <SplashScreen />; 
+  if (loading) return <LDNG />; 
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

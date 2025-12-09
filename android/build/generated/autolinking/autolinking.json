@@ -60,6 +60,30 @@
         }
       }
     },
+    "@react-native-firebase/firestore": {
+      "root": "C:\\dev\\p3\\node_modules\\@react-native-firebase\\firestore",
+      "name": "@react-native-firebase/firestore",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\dev\\p3\\node_modules\\@react-native-firebase\\firestore\\RNFBFirestore.podspec",
+          "version": "23.7.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "C:\\dev\\p3\\node_modules\\@react-native-firebase\\firestore\\android",
+          "packageImportPath": "import io.invertase.firebase.firestore.ReactNativeFirebaseFirestorePackage;",
+          "packageInstance": "new ReactNativeFirebaseFirestorePackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/dev/p3/node_modules/@react-native-firebase/firestore/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-safe-area-context": {
       "root": "C:\\dev\\p3\\node_modules\\react-native-safe-area-context",
       "name": "react-native-safe-area-context",

@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import useAuth from '../hooks/useAuth';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
+  const { signIn } = useAuth(); // modular auth
 
-  const handleLogin = () => {
-    if (email && password) {
-      Alert.alert('Success', `Logged in as ${email}`);
-    } else {
+  const handleLogin = async () => {
+    if (!email || !password) {
       Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+    try {
+      await signIn(email, password);
+      // no need to navigate manually, MainNavigation reacts to isLogin
+    } catch (error) {
+      Alert.alert('Login Failed', error.message);
     }
   };
 

@@ -1,3 +1,4 @@
+// SignUpScreen.jsx
 import React, { useState } from 'react';
 import {
   View,
@@ -7,32 +8,58 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
+import useAuth from '../hooks/useAuth'; // adjust path if needed
 
 const SignUpScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigation = useNavigation();
+  const { signUp } = useAuth();
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!name || !email || !password) {
-      showMessage({
-        message: 'Login Failed 😢',
-        description: 'Please check your credentials',
-        type: 'danger',
-        icon: 'danger',
-        duration: 3000,
-      });
+      Alert.alert('Error', 'Please fill all required fields.');
       return;
+    }
+
+    setSubmitting(true);
+    try {
+      // pass imageUrl as optional 4th arg
+      const user = await signUp(email.trim(), password, name.trim(), imageUrl.trim() || null);
+
+      showMessage({
+        message: 'Account created',
+        description: 'Welcome — your account was created successfully.',
+        type: 'success',
+      });
+
+      // navigate where you want (adjust route name)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (err) {
+      console.error('signup error', err);
+      const msg = err?.message ?? 'Failed to create account.';
+      showMessage({
+        message: 'Signup failed',
+        description: msg,
+        type: 'danger',
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Sign Up</Text>
 
       <TextInput
@@ -40,6 +67,7 @@ const SignUpScreen = () => {
         placeholder="Name"
         value={name}
         onChangeText={setName}
+        autoCapitalize="words"
       />
       <TextInput
         style={styles.input}
@@ -58,13 +86,22 @@ const SignUpScreen = () => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Image URL"
+        placeholder="Image URL (optional)"
         value={imageUrl}
         onChangeText={setImageUrl}
+        autoCapitalize="none"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Register</Text>
+      <TouchableOpacity
+        style={[styles.button, submitting && { opacity: 0.7 }]}
+        onPress={handleSignUp}
+        disabled={submitting}
+      >
+        {submitting ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Register</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
