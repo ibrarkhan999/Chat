@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native';
 import { getAuth, signOut } from '@react-native-firebase/auth';
 import { getFirestore, doc, getDoc } from '@react-native-firebase/firestore';
 import { getApp } from '@react-native-firebase/app';
 import { useNavigation } from '@react-navigation/native';
+import {
+  Menu,
+  MenuTrigger,
+  MenuOptions,
+  MenuOption,
+} from 'react-native-popup-menu';
+import Profile from '../components/Profile';
+import ChatList from '../components/ChatList';
 
 export default function Home() {
   const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [isShownProfile, setIsShownProfile] = useState(false);
   const app = getApp();
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -32,13 +41,9 @@ export default function Home() {
     fetchUser();
   }, [currentUser, db]);
 
-const handleLogout = async () => {
-  try {
-    await signOut(auth); 
-  } catch (e) {
-    console.log("Logout error:", e);
-  }
-};
+  const backButton = async () => {
+    setIsShownProfile(false);
+  };
 
   if (loading) {
     return (
@@ -50,63 +55,80 @@ const handleLogout = async () => {
 
   return (
     <View style={styles.container}>
-      {userData?.imageUrl && (
-        <Image source={{ uri: userData.imageUrl }} style={styles.avatar} />
+      <View style={styles.chatView}>
+        <Text style={styles.chattxt}>Chats</Text>
+
+        <Menu>
+          <MenuTrigger>
+            <Image
+              source={{ uri: userData?.imageUrl }}
+              style={styles.chatimg}
+            />
+          </MenuTrigger>
+
+          <MenuOptions customStyles={menuOptionsStyles}>
+            <MenuOption
+              onSelect={() => setIsShownProfile(true)}
+              text="View Profile"
+            />
+          </MenuOptions>
+        </Menu>
+      </View>
+
+      {isShownProfile ? (
+        <Profile backButton={backButton} userData={userData} />
+      ) : (
+        <ChatList user={user} />
       )}
-
-      <Text style={styles.title}>Welcome Home, {userData?.username || 'User'} 😏</Text>
-      <Text style={styles.subtitle}>Your journey starts here...</Text>
-
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
+const menuOptionsStyles = {
+  optionsContainer: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#4B7BE5',
+  },
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 20,
+    backgroundColor: '#f0f4f7', // soft background
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 20,
+  chatimg: {
+    width: 55,
+    height: 55,
+    borderRadius: 30,
     borderWidth: 2,
-    borderColor: '#4B7BE5',
+    borderColor: '#a6b1c9',
   },
-  title: {
+  chatView: {
+    backgroundColor: '#4B7BE5',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
+    borderBottomRightRadius: 25,
+    borderBottomLeftRadius: 25,
+    alignItems: 'center',
+  },
+  chattxt: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4B7BE5',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  logoutBtn: {
-    backgroundColor: '#E74C3C',
-    paddingVertical: 12,
-    paddingHorizontal: 35,
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  logoutText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: 'white',
   },
 });

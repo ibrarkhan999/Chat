@@ -17,6 +17,7 @@ export default function MainNavigation() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isLogin ? (
         <Stack.Screen name="Home" component={Home} />
+        
       ) : (
         <>
           <Stack.Screen name="Login" component={Login} />

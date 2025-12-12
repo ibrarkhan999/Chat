@@ -9,6 +9,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const { signIn } = useAuth(); // modular auth
 
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter email and password');
