@@ -6,8 +6,12 @@ import {
 } from 'react-native';
 import React from 'react';
 import BTN from './BTN';
+import { getAuth, signOut } from '@react-native-firebase/auth';
+import { getApp } from '@react-native-firebase/app';
 
 export default function Profile({ userData, backButton }) {
+    const app = getApp();
+    const auth = getAuth(app);
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -16,10 +20,12 @@ export default function Profile({ userData, backButton }) {
     }
   };
 
+
   return (
     <View style={styles.container}>
       {userData?.imageUrl && (
-        <Image source={{ uri: userData.imageUrl }} style={styles.avatar} />
+        <Image source={{ uri: userData.imageUrl.trim() }} style={styles.avatar} />
+
       )}
 
       <Text style={styles.title}>

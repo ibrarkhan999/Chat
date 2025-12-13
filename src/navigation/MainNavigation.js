@@ -5,6 +5,7 @@ import Home from '../screen/Home';
 import Login from '../screen/Login';
 import Register from '../screen/Register';
 import LDNG from '../components/LDNG';
+import ChatScreen from '../screen/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +17,10 @@ export default function MainNavigation() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isLogin ? (
+        <>
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="ChatScreen" component={ChatScreen} />
+        </>
         
       ) : (
         <>

@@ -1,49 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native';
-import { getAuth, signOut } from '@react-native-firebase/auth';
-import { getFirestore, doc, getDoc } from '@react-native-firebase/firestore';
-import { getApp } from '@react-native-firebase/app';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import {
-  Menu,
-  MenuTrigger,
-  MenuOptions,
-  MenuOption,
-} from 'react-native-popup-menu';
+import { Menu, MenuTrigger, MenuOptions, MenuOption } from 'react-native-popup-menu';
+
+import { getApp } from '@react-native-firebase/app';
+import { getAuth } from '@react-native-firebase/auth';
+import { getFirestore, collection, doc, getDoc, getDocs } from '@react-native-firebase/firestore';
+
 import Profile from '../components/Profile';
 import ChatList from '../components/ChatList';
 
 export default function Home() {
-  const [userData, setUserData] = useState(null);
-  const [user, setUser] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState(null);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isShownProfile, setIsShownProfile] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  const navigation = useNavigation();
   const app = getApp();
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const navigation = useNavigation();
-
   const currentUser = auth.currentUser;
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!currentUser) return;
+    if (!currentUser) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      setUsers([]); // clear old users
       try {
-        const docRef = doc(db, 'users', currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setUserData(docSnap.data());
-      } catch (e) {
-        console.log('Error loading user:', e);
+        // Fetch current user
+        const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userSnap.exists()) setCurrentUserData(userSnap.data());
+
+        // Fetch all users from server only
+        const usersSnap = await getDocs(collection(db, 'users'), { source: 'server' });
+        const usersList = usersSnap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(u => u.id !== currentUser.uid);
+
+        setUsers(usersList);
+      } catch (error) {
+        console.log('Firebase Error:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchUser();
-  }, [currentUser, db]);
 
-  const backButton = async () => {
-    setIsShownProfile(false);
-  };
+    fetchData();
+  }, [currentUser]);
 
   if (loading) {
     return (
@@ -54,45 +60,48 @@ export default function Home() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.chatView}>
-        <Text style={styles.chattxt}>Chats</Text>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Chats</Text>
 
         <Menu>
           <MenuTrigger>
-            <Image
-              source={{ uri: userData?.imageUrl }}
-              style={styles.chatimg}
-            />
+            {currentUserData?.imageUrl ? (
+              <Image source={{ uri: currentUserData.imageUrl }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>U</Text>
+              </View>
+            )}
           </MenuTrigger>
 
-          <MenuOptions customStyles={menuOptionsStyles}>
-            <MenuOption
-              onSelect={() => setIsShownProfile(true)}
-              text="View Profile"
-            />
+          <MenuOptions customStyles={menuStyles}>
+            <MenuOption text="View Profile" onSelect={() => setShowProfile(true)} />
           </MenuOptions>
         </Menu>
       </View>
 
-      {isShownProfile ? (
-        <Profile backButton={backButton} userData={userData} />
+      {/* Body */}
+      {showProfile ? (
+        <Profile userData={currentUserData} backButton={() => setShowProfile(false)} />
+      ) : users.length > 0 ? (
+        <ChatList user={users} />
       ) : (
-        <ChatList user={user} />
+        <View style={styles.noUsers}>
+          <Text style={styles.noUsersText}>No users found 😢</Text>
+        </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
-const menuOptionsStyles = {
+const menuStyles = {
   optionsContainer: {
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    elevation: 6,
   },
   optionText: {
     fontSize: 16,
@@ -101,34 +110,21 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f4f7', // soft background
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  chatimg: {
-    width: 55,
-    height: 55,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#a6b1c9',
-  },
-  chatView: {
+  container: { flex: 1, backgroundColor: '#F0F4F7' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: {
     backgroundColor: '#4B7BE5',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 15,
-    borderBottomRightRadius: 25,
-    borderBottomLeftRadius: 25,
     alignItems: 'center',
+    padding: 15,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
   },
-  chattxt: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: 'white',
-  },
+  title: { fontSize: 28, fontWeight: '700', color: '#fff' },
+  avatar: { width: 55, height: 55, borderRadius: 30, borderWidth: 2, borderColor: '#A6B1C9' },
+  avatarPlaceholder: { backgroundColor: '#B0B0B0', justifyContent: 'center', alignItems: 'center' },
+  avatarText: { color: 'white', fontWeight: '700', fontSize: 20 },
+  noUsers: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  noUsersText: { fontSize: 18, color: '#888' },
 });
