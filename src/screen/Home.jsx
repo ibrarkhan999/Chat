@@ -1,12 +1,11 @@
+// screens/Home.jsx
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Menu, MenuTrigger, MenuOptions, MenuOption } from 'react-native-popup-menu';
 
-import { getApp } from '@react-native-firebase/app';
-import { getAuth } from '@react-native-firebase/auth';
-import { getFirestore, collection, doc, getDoc, getDocs } from '@react-native-firebase/firestore';
+import { db, auth } from '../firebase/firebase';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 
 import Profile from '../components/Profile';
 import ChatList from '../components/ChatList';
@@ -18,9 +17,6 @@ export default function Home() {
   const [showProfile, setShowProfile] = useState(false);
 
   const navigation = useNavigation();
-  const app = getApp();
-  const auth = getAuth(app);
-  const db = getFirestore(app);
   const currentUser = auth.currentUser;
 
   useEffect(() => {
@@ -28,14 +24,11 @@ export default function Home() {
 
     const fetchData = async () => {
       setLoading(true);
-      setUsers([]); // clear old users
       try {
-        // Fetch current user
         const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
         if (userSnap.exists()) setCurrentUserData(userSnap.data());
 
-        // Fetch all users from server only
-        const usersSnap = await getDocs(collection(db, 'users'), { source: 'server' });
+        const usersSnap = await getDocs(collection(db, 'users'));
         const usersList = usersSnap.docs
           .map(d => ({ id: d.id, ...d.data() }))
           .filter(u => u.id !== currentUser.uid);
@@ -60,7 +53,7 @@ export default function Home() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Chats</Text>
@@ -92,21 +85,13 @@ export default function Home() {
           <Text style={styles.noUsersText}>No users found 😢</Text>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const menuStyles = {
-  optionsContainer: {
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    elevation: 6,
-  },
-  optionText: {
-    fontSize: 16,
-    color: '#4B7BE5',
-  },
+  optionsContainer: { padding: 10, borderRadius: 12, backgroundColor: '#fff', elevation: 6 },
+  optionText: { fontSize: 16, color: '#4B7BE5' },
 };
 
 const styles = StyleSheet.create({

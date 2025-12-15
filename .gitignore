@@ -16,7 +16,7 @@ firebase.js
 firebaseConfig.js
 android/app/google-services.json
 ios/GoogleService-Info.plist
-
+src/firebase/firebase
 # React Native caches
 .expo/
 .expo-shared/
